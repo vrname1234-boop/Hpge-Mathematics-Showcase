@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Perfect Numbers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600;9..144,900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0a0a0a;
+  --paper: #fafafa;
+  --line: #d9d9d9;
+  --dim: #5a5a5a;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+.mono { font-family: 'JetBrains Mono', monospace; }
+.dim { color: var(--dim); font-size: 0.9rem; }
+strong { font-weight: 600; }
+
+/* pages */
+.page { display: none; }
+.page.active { display: block; }
+.page-dark { background: var(--ink); color: var(--paper); }
+.page-dark .dim { color: #999; }
+.page-dark .section { border-top-color: #333; }
+.page-dark .eq-box { border-color: var(--paper); }
+.page-dark .next-page { border-top-color: #333; color: var(--paper); }
+.page-dark .footer { border-top-color: #333; color: #999; }
+
+/* nav */
+.nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.9rem 2rem;
+  border-bottom: 1px solid var(--ink);
+  position: sticky; top: 0;
+  background: var(--paper); z-index: 200;
+}
+.nav-title {
+  font-weight: 600; letter-spacing: 0.25em; font-size: 0.75rem;
+  color: var(--ink); text-decoration: none; cursor: pointer;
+}
+.nav-links { display: flex; overflow-x: auto; }
+.nav-links a {
+  color: var(--ink); text-decoration: none;
+  font-size: 0.72rem; font-weight: 500; letter-spacing: 0.14em;
+  padding: 0.4rem 0.55rem; margin-left: 0.1rem;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap; cursor: pointer;
+}
+.nav-links a:hover { background: var(--ink); color: var(--paper); }
+.nav-links a.on { background: var(--ink); color: var(--paper); }
+.soon-tag {
+  font-size: 0.55rem; letter-spacing: 0.15em;
+  border: 1px solid currentColor; padding: 0.1rem 0.3rem; margin-left: 0.4rem;
+  vertical-align: 1px;
+}
+
+/* reveal */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+/* hero (home) */
+.hero {
+  min-height: calc(100vh - 52px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 2rem; position: relative;
+}
+.hero-kicker { letter-spacing: 0.4em; font-size: 0.7rem; color: var(--dim); margin-bottom: 1.6rem; }
+.hero-equation {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(3rem, 9vw, 6.5rem);
+  font-weight: 900; letter-spacing: -0.02em; margin-bottom: 1.8rem;
+}
+.hero-sub { font-size: 1.05rem; line-height: 1.8; color: var(--dim); max-width: 580px; }
+.scroll-cue {
+  position: absolute; bottom: 2rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  font-size: 0.65rem; letter-spacing: 0.35em; color: var(--ink);
+  text-decoration: none;
+}
+.cue-arrow { font-size: 1.1rem; animation: bounce 1.6s ease-in-out infinite; }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
+
+/* page hero */
+.page-hero { max-width: 1060px; margin: 0 auto; padding: 4.5rem 2rem 2rem; }
+.page-hero .ph-num {
+  font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.3em; color: var(--dim); display: block; margin-bottom: 0.8rem;
+}
+.page-hero h1 {
+  font-family: 'Fraunces', Georgia, serif; font-weight: 900;
+  font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -0.01em; margin-bottom: 1.2rem;
+}
+.page-hero .ph-lede { font-size: 1.05rem; line-height: 1.8; color: var(--dim); max-width: 640px; }
+.page-dark .ph-lede { color: #999; }
+
+/* sections */
+.section { max-width: 1060px; margin: 0 auto; padding: 3.5rem 2rem; border-top: 1px solid var(--ink); }
+.section:first-of-type { border-top: none; }
+.section.inverted { background: var(--ink); color: var(--paper); border-top: none; max-width: none; }
+.section.inverted > * { max-width: 1060px; margin-left: auto; margin-right: auto; }
+
+.section-head { display: flex; align-items: baseline; gap: 1.1rem; margin-bottom: 2.8rem; }
+.section-head .num { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.15em; }
+.section-head h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600; font-size: clamp(1.5rem, 3.4vw, 2.2rem); letter-spacing: 0.02em;
+}
+
+p { line-height: 1.8; margin-bottom: 1.15rem; }
+.lead { font-size: 1.15rem; }
+
+.two-col { display: grid; grid-template-columns: 1.3fr 1fr; gap: 3rem; align-items: start; }
+.eq-box { border: 2px solid var(--ink); padding: 2.2rem; }
+.eq-box.wide { margin-bottom: 2.5rem; }
+.eq { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: clamp(1.2rem, 2.6vw, 1.7rem); margin-bottom: 0.9rem; }
+.eq-note { font-size: 0.9rem; color: var(--dim); line-height: 1.7; }
+.page-dark .eq-note { color: #999; }
+
+/* divisor strip */
+.strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0; border: 1px solid var(--ink); margin-top: 2.5rem; }
+.strip-item { padding: 1.8rem 1.4rem; border-right: 1px solid var(--line); font-size: 0.8rem; color: var(--dim); line-height: 1.8; }
+.strip-item:last-child { border-right: none; }
+.strip-item .mono { display: block; font-family: 'Fraunces', serif; font-weight: 900; font-size: 1.6rem; color: var(--ink); margin-bottom: 0.4rem; }
+
+/* inverted */
+.inverted p, .inverted li { color: var(--paper); }
+.inverted .dim { color: #999; }
+.big-nums { display: flex; flex-wrap: wrap; gap: 0 3rem; align-items: baseline; margin-bottom: 3rem; }
+.big-nums span {
+  font-family: 'Fraunces', serif; font-weight: 900;
+  font-size: clamp(1.8rem, 5.5vw, 3.4rem);
+}
+.inverted-lead { font-size: clamp(1.1rem, 2.4vw, 1.4rem); line-height: 1.8; }
+.inverted-foot { font-size: 1.1rem; margin-top: 2rem; color: #ccc; line-height: 1.8; }
+
+/* path index (home) */
+.path { border-top: 1px solid var(--ink); }
+.path-item {
+  display: grid; grid-template-columns: 4rem 1fr auto; align-items: baseline; gap: 1.5rem;
+  padding: 2.2rem 2rem; border-bottom: 1px solid var(--line);
+  text-decoration: none; color: var(--ink); cursor: pointer;
+  transition: background 0.2s, padding-left 0.2s;
+}
+.path-item:hover { background: var(--ink); color: var(--paper); padding-left: 2.6rem; }
+.path-item .pn { font-size: 0.8rem; font-weight: 600; color: var(--dim); }
+.path-item .pt { font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(1.2rem, 3vw, 1.8rem); letter-spacing: 0.02em; }
+.path-item .pd { font-size: 0.82rem; color: var(--dim); max-width: 320px; text-align: right; }
+.path-item:hover .pd { color: #bbb; }
+
+/* properties */
+.prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; margin-top: 2rem; }
+.prop-card { border: 1px solid var(--ink); padding: 2.2rem; }
+.prop-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.3em; border-bottom: 1px solid var(--ink); padding-bottom: 0.5rem; display: block; margin-bottom: 1rem; }
+.prop-card p { font-size: 0.92rem; }
+
+.endings { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
+.endings b {
+  font-family: 'Fraunces', serif; font-weight: 900;
+  font-size: 0.95rem; padding: 0.35rem 0.55rem; border: 1px solid var(--ink);
+}
+.endings b em { font-style: normal; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.68rem; background: var(--ink); color: var(--paper); padding: 0.2rem 0.35rem; margin-left: 0.4rem; }
+
+.bin-btns { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+.mini-btn, .bin-btns button, .preset {
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em;
+  background: #ececec; border: 1px solid var(--ink); color: var(--ink);
+  padding: 0.45rem 0.8rem; cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.mini-btn:hover, .bin-btns button:hover, .preset:hover, .bin-btns button.on { background: var(--ink); color: var(--paper); }
+.bin-row { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 1rem; align-items: center; }
+.bin-row .cell {
+  width: 26px; height: 26px; border: 1px solid var(--ink);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  opacity: 0; transform: scale(0.4); animation: cellIn 0.3s ease forwards;
+}
+.bin-row .cell.one { background: var(--ink); color: var(--paper); }
+@keyframes cellIn { to { opacity: 1; transform: none; } }
+.bin-label { font-size: 0.72rem; color: var(--dim); width: 100%; margin-bottom: 0.3rem; }
+
+.tri { margin-top: 1rem; line-height: 1.1; }
+.tri .trow { letter-spacing: 0.3em; }
+.tri .tdot {
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--ink); margin-right: 6px;
+  opacity: 0; transform: scale(0); animation: cellIn 0.25s ease forwards;
+}
+
+.cube-out { margin-top: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.8; }
+.cube-out .cterm { opacity: 0; animation: fadeIn 0.4s ease forwards; }
+@keyframes fadeIn { to { opacity: 1; } }
+
+/* tools */
+.tool { border: 1px solid var(--ink); padding: 2.4rem; margin-top: 2rem; }
+.tool h3 { font-size: 0.72rem; letter-spacing: 0.3em; margin-bottom: 1rem; }
+.tool-row { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 1rem; }
+.tool-row select, .tool-row input {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;
+  padding: 0.7rem 0.9rem; border: 1px solid var(--ink);
+  background: var(--paper); color: var(--ink); min-width: 180px; border-radius: 0;
+}
+.tool-row select:focus, .tool-row input:focus { outline: 2px solid var(--ink); outline-offset: -1px; }
+.tool-row button {
+  font-size: 0.82rem; font-weight: 600;
+  padding: 0.7rem 1.6rem; background: var(--ink); color: var(--paper);
+  border: 1px solid var(--ink); cursor: pointer; letter-spacing: 0.15em;
+  transition: background 0.15s, color 0.15s;
+}
+.tool-row button:hover { background: var(--paper); color: var(--ink); }
+.preset-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.9rem; }
+.preset-label { font-size: 0.7rem; font-weight: 600; color: var(--dim); letter-spacing: 0.2em; }
+.tool-out {
+  margin-top: 1.4rem; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem; line-height: 1.8;
+  border-top: 1px dashed var(--line); padding-top: 1.2rem;
+  white-space: pre-wrap; word-break: break-all;
+}
+.tool-out .verdict { display: inline-block; border: 2px solid var(--ink); padding: 0.25rem 0.9rem; font-weight: 800; letter-spacing: 0.12em; }
+.tool-out .verdict.perfect { background: var(--ink); color: var(--paper); }
+.tool-out .step { opacity: 0; animation: fadeIn 0.4s ease forwards; display: block; }
+.note { font-size: 0.88rem; color: var(--dim); margin-top: 1.2rem; }
+
+/* classes */
+.class-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--ink); margin: 2rem 0 0.5rem; }
+.class-item { padding: 2rem; border-right: 1px solid var(--line); font-size: 0.85rem; color: var(--dim); line-height: 1.7; }
+.class-item:last-child { border-right: none; }
+.class-item .mono { display: block; font-size: 0.95rem; color: var(--ink); margin-bottom: 0.4rem; }
+.class-item strong { display: block; font-size: 0.72rem; letter-spacing: 0.25em; color: var(--ink); margin-bottom: 0.5rem; }
+
+/* family */
+.amic-card { border: 2px solid var(--ink); padding: 2.2rem; }
+.amic-card p { font-size: 0.92rem; }
+.amic-pair { display: flex; align-items: center; gap: 1.2rem; margin: 1.2rem 0; }
+.amic-pair .mono { font-family: 'Fraunces', serif; font-size: 2.4rem; font-weight: 900; }
+.amic-arrow { font-size: 1.6rem; animation: swap 1.8s ease-in-out infinite; }
+@keyframes swap { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(-1); } }
+.amic-fact { border-top: 1px dashed var(--line); padding-top: 1rem; color: var(--dim); }
+
+/* game */
+.game-num { font-family: 'Fraunces', serif; font-weight: 900; font-size: clamp(2.5rem, 7vw, 4.5rem); text-align: center; margin: 1.5rem 0 2rem; }
+.game-btns { display: flex; gap: 0.8rem; justify-content: center; }
+.game-out { text-align: center; min-height: 3.4rem; margin-top: 1.4rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; line-height: 1.8; }
+.game-score { font-size: 0.72rem; letter-spacing: 0.2em; color: var(--dim); text-align: center; margin-top: 0.8rem; }
+.game-next { text-align: center; margin-top: 1rem; }
+
+/* table */
+.mers-table { width: 100%; border-collapse: collapse; margin-top: 2rem; }
+.mers-table th {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.25em; text-align: left;
+  padding: 0.8rem 1rem; border-bottom: 2px solid var(--ink);
+}
+.mers-table td {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+  padding: 0.75rem 1rem; border-bottom: 1px solid var(--line);
+}
+.mers-table tr:hover td { background: #efefef; }
+
+/* video placeholder */
+.video-frame {
+  max-width: 760px; margin: 3rem auto 2rem; aspect-ratio: 16 / 9;
+  border: 2px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+}
+.video-play {
+  width: 0; height: 0;
+  border-top: 34px solid transparent;
+  border-bottom: 34px solid transparent;
+  border-left: 56px solid var(--ink);
+  transition: transform 0.2s;
+}
+.video-frame:hover .video-play { transform: scale(1.12); }
+.video-cap { text-align: center; font-size: 0.85rem; color: var(--dim); }
+
+/* constraints */
+.cond-list { list-style: none; margin-top: 1.8rem; }
+.cond-list li { padding: 1.3rem 0 1.3rem 1.8rem; border-bottom: 1px solid #333; position: relative; font-size: 0.98rem; line-height: 1.75; }
+.cond-list li::before { content: '·'; position: absolute; left: 0; font-weight: 600; }
+
+/* next page */
+.next-page {
+  display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.8rem;
+  padding: 2.2rem 2rem; border-top: 1px solid var(--ink);
+  text-decoration: none; color: var(--ink); cursor: pointer;
+}
+.next-page .np-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.3em; color: var(--dim); }
+.next-page .np-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(1.3rem, 3vw, 2rem); }
+.next-page .np-arrow { font-size: 1.4rem; transition: transform 0.2s; }
+.next-page:hover .np-arrow { transform: translateX(8px); }
+.next-page:hover { background: var(--ink); color: var(--paper); }
+.next-page:hover .np-label { color: #999; }
+
+/* footer */
+.footer {
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem;
+  padding: 1.6rem 2rem; border-top: 1px solid var(--ink);
+  font-size: 0.68rem; letter-spacing: 0.18em; color: var(--dim);
+}
+.footer a { color: inherit; cursor: pointer; }
+
+@media (max-width: 860px) {
+  .two-col, .prop-grid { grid-template-columns: 1fr; }
+  .class-grid { grid-template-columns: 1fr; }
+  .class-item { border-right: none; border-bottom: 1px solid var(--line); }
+  .strip { grid-template-columns: 1fr; }
+  .strip-item { border-right: none; border-bottom: 1px solid var(--line); }
+  .mers-table { display: block; overflow-x: auto; }
+  .path-item { grid-template-columns: 3rem 1fr; }
+  .path-item .pd { display: none; }
+  .nav { padding: 0.9rem 1rem; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-title" data-page="home">PERFECT NUMBERS</a>
+  <span class="nav-links">
+    <a data-page="home" class="on">HOME</a>
+    <a data-page="properties">PROPERTIES</a>
+    <a data-page="explore">EXPLORE</a>
+    <a data-page="open">OPEN PROBLEM</a>
+    <a data-page="video">VIDEO<span class="soon-tag">SOON</span></a>
+  </span>
+</nav>
+
+<!-- ============ PAGE: HOME ============ -->
+<div class="page active" id="page-home">
+  <header class="hero">
+    <p class="hero-kicker reveal">AN EXPLORATION IN NUMBER THEORY</p>
+    <h1 class="hero-equation reveal">6 = 1 + 2 + 3</h1>
+    <p class="hero-sub reveal">Add up everything that divides 6 evenly and you get 6 back. It sounds simple, but only 52 numbers are known to pull it off. This site is about why that is so rare, and why mathematicians have been hooked on it for over two thousand years.</p>
+    <a class="scroll-cue" href="#def"><span>SCROLL</span><span class="cue-arrow">&#8595;</span></a>
+  </header>
+
+  <section class="section" id="def">
+    <div class="section-head reveal"><span class="num">01</span><h2>THE DEFINITION</h2></div>
+    <div class="two-col">
+      <div class="reveal">
+        <p class="lead">A perfect number equals the sum of the numbers that divide it evenly, not counting itself.</p>
+        <p>Take 6. The numbers that divide it evenly are 1, 2 and 3. Add them up and you get 6 back. The number rebuilds itself from its own parts.</p>
+        <p>That almost never happens. Mathematicians write the idea like this:</p>
+      </div>
+      <div class="eq-box reveal">
+        <div class="eq">&sigma;(n) = 2n</div>
+        <p class="eq-note">&sigma; is the Greek letter sigma. Here it means "add up every divisor of n, including n itself". If the total lands exactly on double the number, the number is perfect.</p>
+      </div>
+    </div>
+    <div class="strip reveal">
+      <div class="strip-item"><span class="mono">6</span>1 + 2 + 3</div>
+      <div class="strip-item"><span class="mono">28</span>1 + 2 + 4 + 7 + 14</div>
+      <div class="strip-item"><span class="mono">496</span>1 + 2 + 4 + 8 + 16 + 31 + 62 + 124 + 248</div>
+      <div class="strip-item"><span class="mono">8128</span>1 + 2 + 4 + 8 + 16 + 32 + 64 + 127 + 254 + 508 + 1016 + 2032 + 4064</div>
+    </div>
+  </section>
+
+  <section class="section inverted" id="perfects">
+    <div class="section-head reveal"><span class="num">02</span><h2>THE PERFECTS</h2></div>
+    <div class="big-nums">
+      <span>6</span>
+      <span>28</span>
+      <span>496</span>
+      <span>8,128</span>
+      <span>33,550,336</span>
+    </div>
+    <p class="inverted-lead reveal">Only 52 perfect numbers have ever been found. The fifth has 8 digits. The newest, found in 2024, has over 82 million. Printed out, that one number would fill about twenty thousand pages.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-head reveal"><span class="num">&#8251;</span><h2>THE PATH</h2></div>
+    <p class="reveal">That is the whole idea. The rest of the site looks at what grows out of it. Pick a page below, or use the menu up top.</p>
+    <div class="path">
+      <a class="path-item" data-page="properties">
+        <span class="pn">03</span><span class="pt">HIDDEN PROPERTIES</span>
+        <span class="pd">The patterns hiding inside every perfect number.</span>
+      </a>
+      <a class="path-item" data-page="explore">
+        <span class="pn">04</span><span class="pt">THE PLAYGROUND</span>
+        <span class="pd">Try the maths yourself with three interactive tools.</span>
+      </a>
+      <a class="path-item" data-page="open">
+        <span class="pn">05</span><span class="pt">THE OPEN PROBLEM</span>
+        <span class="pd">The question nobody has answered in 2,000 years.</span>
+      </a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>PERFECT NUMBERS · HPGE MATHEMATICS SHOWCASE</span>
+    <span><a data-page="properties">START: HIDDEN PROPERTIES &rarr;</a></span>
+  </footer>
+</div>
+
+<!-- ============ PAGE: PROPERTIES ============ -->
+<div class="page" id="page-properties">
+  <header class="page-hero">
+    <span class="ph-num">03 · PROPERTIES</span>
+    <h1>HIDDEN PROPERTIES</h1>
+    <p class="ph-lede">Perfect numbers hide the same patterns inside themselves. Each card below lets you check one.</p>
+  </header>
+
+  <section class="section">
+    <div class="prop-grid">
+      <div class="prop-card reveal">
+        <span class="prop-label">THE BROKEN GUESS</span>
+        <p>Look at the first four perfect numbers. They have 1, 2, 3 and 4 digits. A Greek writer named Nicomachus declared there was exactly one perfect number of each size, marching neatly upward.</p>
+        <p>Then the fifth one turned up with 8 digits. His pattern collapsed, and it took over a thousand years of work just to find that fifth number at all.</p>
+        <div class="endings" id="endings"></div>
+      </div>
+
+      <div class="prop-card reveal">
+        <span class="prop-label">BINARY</span>
+        <p>Computers write every number using only 1s and 0s. That system is called binary.</p>
+        <p>Write a perfect number in binary and something strange appears: a solid block of 1s, then a block of 0s, never mixed. Click a number to see it.</p>
+        <div class="bin-btns" id="binBtns"></div>
+        <div class="bin-row" id="binRow"><span class="dim">6, 28, 496 or 8,128. Pick one.</span></div>
+      </div>
+
+      <div class="prop-card reveal">
+        <span class="prop-label">TRIANGLES</span>
+        <p>A triangular number counts dots stacked in a triangle: 1, 3, 6, 10, 15, 21, 28.</p>
+        <p>Every even perfect number is one of them. Press the button and watch 28 stack itself, row by row.</p>
+        <button class="mini-btn" id="triBtn">BUILD 28</button>
+        <div class="tri" id="tri"></div>
+      </div>
+
+      <div class="prop-card reveal">
+        <span class="prop-label">ODD CUBES</span>
+        <p>A cube is a number multiplied by itself twice. For example, 3 x 3 x 3 = 27.</p>
+        <p>Every even perfect number except 6 equals a run of odd cubes added together. Pick one and watch the cubes land exactly on it.</p>
+        <div class="bin-btns" id="cubeBtns"></div>
+        <div class="cube-out" id="cubeOut"><span class="dim">Pick one to see the cubes.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <a class="next-page" data-page="explore">
+    <span class="np-label">NEXT</span>
+    <span class="np-title">THE PLAYGROUND</span>
+    <span class="np-arrow">&rarr;</span>
+  </a>
+</div>
+
+<!-- ============ PAGE: EXPLORE ============ -->
+<div class="page" id="page-explore">
+  <header class="page-hero">
+    <span class="ph-num">04 · THE PLAYGROUND</span>
+    <h1>TRY IT YOURSELF</h1>
+    <p class="ph-lede">Three tools and a game. Pick one.</p>
+  </header>
+
+  <section class="section">
+    <div class="section-head reveal"><h2>THE FORMULA</h2></div>
+    <div class="eq-box wide reveal">
+      <div class="eq">P = 2<sup>p&minus;1</sup> &times; (2<sup>p</sup> &minus; 1)</div>
+      <p class="eq-note">Here is how to read it. Pick a small prime p. Work out 2<sup>p</sup> &minus; 1. If that answer is also prime, it is called a <strong>Mersenne prime</strong>, and multiplying it by 2<sup>p&minus;1</sup> gives you a perfect number. Euler proved there is no other way to make an even one.</p>
+    </div>
+    <div class="tool reveal">
+      <h3>GENERATOR</h3>
+      <p>Pick an exponent and press generate. The tool works through the steps out loud so you can follow the maths as it happens.</p>
+      <div class="tool-row">
+        <select id="expSelect"></select>
+        <button id="genBtn">GENERATE</button>
+      </div>
+      <div class="tool-out" id="genOut"><span class="dim">Select an exponent and generate.</span></div>
+    </div>
+    <table class="mers-table reveal">
+      <thead><tr><th>p</th><th>Mersenne 2<sup>p</sup> &minus; 1</th><th>Perfect number</th></tr></thead>
+      <tbody id="mersBody"></tbody>
+    </table>
+    <p class="note">The exponent p must be prime for any chance. Even that is not enough: 2<sup>11</sup> &minus; 1 = 2047, and 2047 = 23 &times; 89, so it fails. You can test it in the generator above.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-head reveal"><h2>SIGMA EXPLORER</h2></div>
+    <div class="eq-box wide reveal">
+      <div class="eq">&sigma;(n)</div>
+      <p class="eq-note">That symbol is the Greek letter <strong>sigma</strong>. In maths it means "add up all the divisors of n, including n itself". Try it on 6: the divisors are 1, 2, 3 and 6, so &sigma;(6) = 12. That is exactly double 6, which is why 6 is perfect.</p>
+    </div>
+    <p class="reveal">Compare &sigma;(n) to double the number, and every integer lands in one of three classes:</p>
+    <div class="class-grid reveal">
+      <div class="class-item"><span class="mono">&sigma; &lt; 2n</span><strong>DEFICIENT</strong>The divisors add up to less than double. Most numbers live here.</div>
+      <div class="class-item"><span class="mono">&sigma; = 2n</span><strong>PERFECT</strong>The divisors add up to exactly double. Almost never happens.</div>
+      <div class="class-item"><span class="mono">&sigma; &gt; 2n</span><strong>ABUNDANT</strong>The divisors add up to more than double.</div>
+    </div>
+    <div class="tool reveal">
+      <h3>TEST A NUMBER</h3>
+      <p>Type any whole number. The explorer finds everything that divides it evenly, adds the divisors step by step, and tells you which class it lands in.</p>
+      <div class="tool-row">
+        <input id="numInput" type="number" min="1" placeholder="type a number">
+        <button id="testBtn">ANALYSE</button>
+      </div>
+      <div class="preset-row">
+        <span class="preset-label">TRY:</span>
+        <button class="preset" data-n="6">6</button>
+        <button class="preset" data-n="28">28</button>
+        <button class="preset" data-n="496">496</button>
+        <button class="preset" data-n="945">945</button>
+        <button class="preset" data-n="2009">2009</button>
+      </div>
+      <div class="tool-out" id="testOut"><span class="dim">Enter a whole number above 1.</span></div>
+    </div>
+    <p class="note">945 is the smallest odd abundant number. Its divisors reach past double without it being even.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-head reveal"><h2>THE FAMILY</h2></div>
+    <p class="reveal">Here is a game mathematicians play. Take a number, add up its divisors (not counting itself), and let the answer become the next number. Repeat. That chain is called an <em>aliquot sequence</em>. Some chains stop at 1. Some loop forever. And the chain starting at 276 is still going after a century of trying. Nobody knows if it ever ends.</p>
+    <div class="two-col">
+      <div class="tool reveal">
+        <h3>ALIQUOT WALKER</h3>
+        <p>Type a number and press walk. Try 12, 28 or 220. Each one ends a different way.</p>
+        <div class="tool-row">
+          <input id="aliqInput" type="number" min="1" placeholder="try 12">
+          <button id="aliqBtn">WALK</button>
+        </div>
+        <div class="tool-out" id="aliqOut"><span class="dim">Try 12. It is a classic.</span></div>
+      </div>
+      <div class="amic-card reveal">
+        <span class="prop-label">AMICABLE NUMBERS</span>
+        <p>Sometimes a chain does not stop at one number. It bounces between two forever.</p>
+        <div class="amic-pair"><span class="mono">220</span><span class="amic-arrow">&harr;</span><span class="mono">284</span></div>
+        <p>The divisors of 220 add up to 284. The divisors of 284 add up to 220. Mathematicians call them amicable numbers. Type 220 into the walker and watch it happen.</p>
+        <p class="amic-fact">The next pair, 1184 and 1210, was found in 1860 by a sixteen-year-old Italian schoolboy named Nicol&ograve; Paganini.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head reveal"><h2>SPOT THE PERFECT</h2></div>
+    <p class="reveal">Quick game. A number appears on the card. Is it perfect or not? Make your guess first, then check the working.</p>
+    <div class="tool reveal">
+      <div class="game-num" id="gameNum">&middot;</div>
+      <div class="game-btns tool-row">
+        <button id="gYes">PERFECT</button>
+        <button id="gNo">NOT PERFECT</button>
+      </div>
+      <div class="game-out" id="gameOut"><span class="dim">Make a guess.</span></div>
+      <div class="game-next"><button class="mini-btn" id="gNext" style="display:none">NEXT NUMBER</button></div>
+      <div class="game-score" id="gameScore"></div>
+    </div>
+  </section>
+
+  <a class="next-page" data-page="open">
+    <span class="np-label">NEXT</span>
+    <span class="np-title">THE OPEN PROBLEM</span>
+    <span class="np-arrow">&rarr;</span>
+  </a>
+</div>
+
+<!-- ============ PAGE: VIDEO ============ -->
+<div class="page" id="page-video">
+  <header class="page-hero">
+    <span class="ph-num">COMING SOON</span>
+    <h1>THE VIDEO</h1>
+    <p class="ph-lede">A video walkthrough of everything on this site is in the works. Check back soon.</p>
+  </header>
+
+  <div class="video-frame reveal"><div class="video-play"></div></div>
+  <p class="video-cap">Nothing here yet. The screen is waiting.</p>
+
+  <a class="next-page" data-page="home">
+    <span class="np-label">BACK TO</span>
+    <span class="np-title">THE BEGINNING</span>
+    <span class="np-arrow">&rarr;</span>
+  </a>
+</div>
+
+<!-- ============ PAGE: OPEN ============ -->
+<div class="page page-dark" id="page-open">
+  <header class="page-hero">
+    <span class="ph-num">05 · THE OPEN PROBLEM</span>
+    <h1>DOES AN ODD PERFECT NUMBER EXIST?</h1>
+    <p class="ph-lede">Every perfect number ever found is even. All 52 of them. Does an odd one exist? Nobody knows.</p>
+  </header>
+
+  <section class="section">
+    <p class="reveal">It is one of the oldest unanswered questions in mathematics, standing for over two thousand years. Nobody has found an odd perfect number, and nobody has proved one cannot exist. The search has not been useless though. Mathematicians have worked out exactly what such a number would have to look like:</p>
+    <ul class="cond-list">
+      <li class="reveal">It would have to be bigger than 10<sup>1500</sup>. That is a number with 1,501 digits, far beyond anything physically meaningful.</li>
+      <li class="reveal">It would need at least 101 prime factors, counting repeats.</li>
+      <li class="reveal">Its largest prime factor would have to be bigger than 100 million.</li>
+      <li class="reveal">It cannot be divisible by 105.</li>
+    </ul>
+    <p class="inverted-foot reveal">A number that big and that specific might not exist at all. But nobody has proved it either way. It is still out there, or it isn't.</p>
+  </section>
+
+  <section class="section">
+    <div class="two-col">
+      <div class="reveal">
+        <p class="lead">That is why perfect numbers matter.</p>
+        <p>The rule for even ones was finished over 2,300 years ago. The odd version sits right next to it, still open. One side solved, one side a mystery.</p>
+      </div>
+      <div class="reveal">
+        <p>From Euclid's proof to a volunteer's laptop in 2024, this is one of the longest searches in mathematics.</p>
+      </div>
+    </div>
+  </section>
+
+  <a class="next-page" data-page="home">
+    <span class="np-label">BACK TO</span>
+    <span class="np-title">THE BEGINNING</span>
+    <span class="np-arrow">&rarr;</span>
+  </a>
+
+  <footer class="footer">
+    <span>PERFECT NUMBERS · HPGE MATHEMATICS SHOWCASE</span>
+    <span>SOURCES: EUCLID, ELEMENTS IX.36 · EULER (1747) · GIMPS · OCHEM &amp; RAO (2012)</span>
+  </footer>
+</div>
+
+<script>
+// Perfect Numbers — single file. Nav swaps pages; every tool teaches as it runs.
+// All arithmetic uses BigInt for exact integer math.
+
+const $ = s => document.querySelector(s);
+const LIMIT = 1000000000n; // sqrt is ~32k iterations, keeps the page responsive
+
+// The only Mersenne exponents in the dropdown whose 2^p - 1 is prime (verified list).
+// Checking primality by trial division on a 19-digit number froze the page, so we
+// use the known list instead of factoring at runtime.
+const MERSENNE_OK = new Set([2n, 3n, 5n, 7n, 13n, 17n, 19n, 31n, 61n]);
+
+const divisors = n => {
+  const ds = [1n];
+  for (let i = 2n; i * i <= n; i++) {
+    if (n % i === 0n) { ds.push(i); if (i * i !== n) ds.push(n / i); }
+  }
+  return ds.sort((a, b) => (a < b ? -1 : 1));
+};
+
+const readNum = el => {
+  const v = Math.floor(Number(el.value));
+  return Number.isFinite(v) ? BigInt(v) : 0n;
+};
+
+// ---- page router ----
+const pages = document.querySelectorAll('.page');
+const navLinks = document.querySelectorAll('.nav-links a[data-page]');
+const go = name => {
+  if (!document.getElementById('page-' + name)) return;
+  pages.forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
+  navLinks.forEach(a => a.classList.toggle('on', a.dataset.page === name));
+  scrollTo(0, 0);
+  history.replaceState(null, '', '#' + name);
+};
+document.querySelectorAll('[data-page]').forEach(el =>
+  el.addEventListener('click', e => { e.preventDefault(); go(el.dataset.page); }));
+addEventListener('hashchange', () => go(location.hash.slice(1)));
+if (location.hash.length > 1) go(location.hash.slice(1));
+
+// ---- reveals ----
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// ---- the broken guess: digit counts ----
+const endings = $('#endings');
+if (endings) {
+  endings.innerHTML = [
+    ['6', '1'], ['28', '2'], ['496', '3'], ['8,128', '4'], ['33,550,336', '8']
+  ].map(([n, d]) => `<b>${n}<em>${d} DIGITS</em></b>`).join('');
+}
+
+// ---- binary ----
+const binBtns = $('#binBtns');
+if (binBtns) {
+  const binRow = $('#binRow');
+  [
+    { dec: '6',     bits: '110' },
+    { dec: '28',    bits: '11100' },
+    { dec: '496',   bits: '111110000' },
+    { dec: '8,128', bits: '1111111000000' }
+  ].forEach(b => {
+    const btn = document.createElement('button');
+    btn.textContent = b.dec;
+    btn.onclick = () => {
+      binBtns.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+      btn.classList.add('on');
+      const ones = b.bits.split('').filter(c => c === '1').length;
+      binRow.innerHTML = `<span class="bin-label">${b.dec} in binary: ${ones} ones, then ${b.bits.length - ones} zeros</span>` +
+        b.bits.split('').map((c, i) =>
+          `<span class="cell ${c === '1' ? 'one' : ''}" style="animation-delay:${i * 40}ms">${c}</span>`).join('');
+    };
+    binBtns.appendChild(btn);
+  });
+}
+
+// ---- triangle ----
+const triBtn = $('#triBtn');
+if (triBtn) triBtn.onclick = () => {
+  const tri = $('#tri');
+  tri.innerHTML = '';
+  let delay = 0;
+  [1, 2, 3, 4, 5, 6, 7].forEach(len => {
+    const row = document.createElement('div');
+    row.className = 'trow';
+    for (let i = 0; i < len; i++) {
+      const d = document.createElement('span');
+      d.className = 'tdot';
+      d.style.animationDelay = (delay += 45) + 'ms';
+      row.appendChild(d);
+    }
+    tri.appendChild(row);
+  });
+  const cap = document.createElement('div');
+  cap.className = 'bin-label';
+  cap.style.animationDelay = delay + 200 + 'ms';
+  cap.textContent = '7 rows: 1+2+3+4+5+6+7 = 28. Every even perfect number stacks like this.';
+  tri.appendChild(cap);
+};
+
+// ---- odd cubes ----
+const cubeBtns = $('#cubeBtns');
+if (cubeBtns) {
+  [
+    { dec: '28',    cubes: [1, 3] },
+    { dec: '496',   cubes: [1, 3, 5, 7] },
+    { dec: '8,128', cubes: [1, 3, 5, 7, 9, 11, 13, 15] }
+  ].forEach(c => {
+    const btn = document.createElement('button');
+    btn.textContent = c.dec;
+    btn.onclick = () => {
+      cubeBtns.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+      btn.classList.add('on');
+      const terms = c.cubes.map(o => `${o}³`).join(' + ');
+      const vals = c.cubes.map(o => Math.pow(o, 3)).join(' + ');
+      $('#cubeOut').innerHTML =
+        `<span class="cterm">${c.dec} = ${terms}</span><br>` +
+        `<span class="cterm" style="animation-delay:250ms">= ${vals}</span><br>` +
+        `<span class="cterm" style="animation-delay:500ms">= ${c.dec.replace(',', '')}. It lands exactly.</span>`;
+    };
+    cubeBtns.appendChild(btn);
+  });
+}
+
+// ---- generator ----
+const expSelect = $('#expSelect');
+if (expSelect) {
+  [2, 3, 5, 7, 11, 13, 17, 19, 31, 61].forEach(p => expSelect.add(new Option('p = ' + p, p)));
+  expSelect.value = '5';
+  const generate = () => {
+    const p = BigInt(expSelect.value);
+    const m = (1n << p) - 1n;
+    const a = 1n << (p - 1n);
+    const out = $('#genOut');
+    if (!MERSENNE_OK.has(p)) {
+      out.innerHTML =
+        `<span class="step">Step 1: p = ${p} is prime. Good start.</span>` +
+        `<span class="step" style="animation-delay:600ms">Step 2: work out 2^${p} - 1. That gives ${m.toLocaleString()}.</span>` +
+        `<span class="step" style="animation-delay:1200ms">Step 3: is it prime? No. ${m.toLocaleString()} = 23 x 89.</span>` +
+        `<span class="step" style="animation-delay:1800ms">The formula only works when 2^p - 1 is prime. p = 11 is the smallest prime that fails. Try p = 13 next.</span>`;
+      return;
+    }
+    const perf = a * m;
+    out.innerHTML =
+      `<span class="step">Step 1: p = ${p} is prime.</span>` +
+      `<span class="step" style="animation-delay:600ms">Step 2: work out 2^${p} - 1. That gives ${m.toLocaleString()}.</span>` +
+      `<span class="step" style="animation-delay:1200ms">Step 3: is it prime? Yes. That makes ${m.toLocaleString()} a Mersenne prime.</span>` +
+      `<span class="step" style="animation-delay:1800ms">Step 4: multiply it by 2^${p - 1n} = ${a.toLocaleString()}.</span>` +
+      `<span class="step" style="animation-delay:2400ms">${a.toLocaleString()} x ${m.toLocaleString()} = <strong>${perf.toLocaleString()}</strong></span>` +
+      `<span class="step" style="animation-delay:3000ms">${perf.toString().length} digits, every one exact. Guaranteed perfect by the Euclid-Euler theorem.</span>`;
+  };
+  $('#genBtn').onclick = generate;
+}
+
+// ---- sigma explorer ----
+const testBtn = $('#testBtn');
+if (testBtn) {
+  const analyse = n => {
+    const out = $('#testOut');
+    if (n < 2n) { out.innerHTML = '<span class="dim">Enter a whole number of 2 or more.</span>'; return; }
+    if (n > LIMIT) { out.innerHTML = `<span class="dim">Keep it under ${Number(LIMIT).toLocaleString()}. Bigger numbers take too long to factor on a webpage.</span>`; return; }
+    const ds = divisors(n);
+    const sigma = ds.reduce((s, d) => s + d, n);
+    const cls = sigma === 2n * n ? 'PERFECT' : sigma < 2n * n ? 'DEFICIENT' : 'ABUNDANT';
+    const listed = ds.length > 30 ? ds.slice(0, 30).join(', ') + ', …' : ds.join(', ');
+    const why = cls === 'PERFECT'
+      ? `The divisors rebuilt ${n.toLocaleString()} exactly. That is the whole definition.`
+      : cls === 'DEFICIENT'
+      ? `The divisors only reach ${(sigma - n).toLocaleString()}. They cannot rebuild the number.`
+      : `The divisors reach ${(sigma - n).toLocaleString()}, more than the number itself.`;
+    out.innerHTML =
+      `<span class="step">Step 1: find every number that divides ${n.toLocaleString()} evenly, except itself.</span>` +
+      `<span class="step" style="animation-delay:500ms">${listed}</span>` +
+      `<span class="step" style="animation-delay:1100ms">Step 2: add them up. Total: ${(sigma - n).toLocaleString()}.</span>` +
+      `<span class="step" style="animation-delay:1700ms">Step 3: include ${n.toLocaleString()} itself and &sigma;(${n.toLocaleString()}) = ${sigma.toLocaleString()}. Double the number would be ${(2n * n).toLocaleString()}.</span>` +
+      `<span class="step" style="animation-delay:2300ms">${why}</span>` +
+      `<span class="step" style="animation-delay:2900ms"><span class="verdict ${cls === 'PERFECT' ? 'perfect' : ''}">${cls}</span></span>`;
+  };
+  testBtn.onclick = () => analyse(readNum($('#numInput')));
+  $('#numInput').addEventListener('keydown', e => { if (e.key === 'Enter') testBtn.click(); });
+  document.querySelectorAll('.preset').forEach(b =>
+    b.onclick = () => { $('#numInput').value = b.dataset.n; analyse(BigInt(b.dataset.n)); });
+}
+
+// ---- aliquot walker ----
+const aliqBtn = $('#aliqBtn');
+if (aliqBtn) {
+  const aliquot = () => {
+    let n = readNum($('#aliqInput'));
+    const out = $('#aliqOut');
+    if (n < 1n || n > LIMIT) {
+      out.innerHTML = `<span class="dim">Pick a number between 1 and ${Number(LIMIT).toLocaleString()}.</span>`;
+      return;
+    }
+    const chain = [n];
+    const seen = new Set([n.toString()]);
+    let verdict = '';
+    for (let i = 0; i < 60; i++) {
+      if (n > LIMIT) {
+        verdict = `The chain escapes past ${Number(LIMIT).toLocaleString()} and keeps climbing. Some aliquot sequences never come back. Nobody knows if 276's does.`;
+        break;
+      }
+      const next = n === 1n ? 0n : divisors(n).reduce((s, d) => s + d, 0n);
+      if (next === 0n) { verdict = `The chain dies at 0. ${chain[0]} ends the run.`; break; }
+      if (next === 1n) { chain.push(1n); verdict = `${chain[0]} reaches 1. The chain dies out.`; break; }
+      if (next === n) { chain.push(next); verdict = `${n} sums back to itself. ${n} is PERFECT and loops forever.`; break; }
+      if (seen.has(next.toString())) {
+        chain.push(next);
+        verdict = `A loop. ${next} repeats. A two-number loop is an amicable pair; longer loops are called sociable.`;
+        break;
+      }
+      chain.push(next); seen.add(next.toString()); n = next;
+    }
+    if (!verdict) verdict = 'Still running after 60 steps. This chain is stubborn.';
+    out.innerHTML =
+      `<span class="step">Each arrow means: the proper divisors of the left number add up to the right number.</span>` +
+      `<span class="step" style="animation-delay:600ms">${chain.map(x => x.toLocaleString()).join(' → ')}</span>` +
+      `<span class="step" style="animation-delay:1200ms">${verdict}</span>`;
+  };
+  aliqBtn.onclick = aliquot;
+  $('#aliqInput').addEventListener('keydown', e => { if (e.key === 'Enter') aliqBtn.click(); });
+}
+
+// ---- spot the perfect ----
+const gameNum = $('#gameNum');
+if (gameNum) {
+  const pool = [6n, 12n, 27n, 28n, 33n, 60n, 496n, 100n, 8128n, 45n, 96n, 220n];
+  let order = [...pool].sort(() => Math.random() - 0.5);
+  let gi = 0, score = 0, answered = 0;
+  const show = () => {
+    gameNum.textContent = order[gi].toLocaleString();
+    $('#gameOut').innerHTML = '<span class="dim">Perfect or not? Take a guess.</span>';
+    $('#gNext').style.display = 'none';
+  };
+  const guess = saidPerfect => {
+    const n = order[gi];
+    const s = divisors(n).reduce((a, d) => a + d, 0n);
+    const isPerf = s === n;
+    const right = saidPerfect === isPerf;
+    answered++; if (right) score++;
+    $('#gameOut').innerHTML =
+      `<span class="step">Its divisors add to ${s.toLocaleString()}${isPerf ? ', exactly the number itself' : ', which is not the number'}.</span>` +
+      `<span class="step" style="animation-delay:400ms"><strong>${right ? 'Correct.' : 'Not quite.'}</strong> ${n.toLocaleString()} is ${isPerf ? 'PERFECT' : 'not perfect'}.</span>`;
+    $('#gameScore').textContent = `Score: ${score} / ${answered}`;
+    $('#gNext').style.display = 'inline-block';
+  };
+  $('#gYes').onclick = () => guess(true);
+  $('#gNo').onclick = () => guess(false);
+  $('#gNext').onclick = () => { gi = (gi + 1) % order.length; show(); };
+  show();
+}
+
+// ---- mersenne table ----
+const tbody = $('#mersBody');
+if (tbody) {
+  [2, 3, 5, 7, 13, 17, 19, 31].forEach(p => {
+    const pb = BigInt(p);
+    const m = (1n << pb) - 1n;
+    const perf = (1n << (pb - 1n)) * m;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${p}</td><td>${m.toLocaleString()}</td><td>${perf.toLocaleString()}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+</script>
+</body>
+</html>
